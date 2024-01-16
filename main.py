@@ -1,5 +1,5 @@
 #aplikacja wymaga python3, oraz tkinter
-#python3 -m pip install tk
+# apt-get install python3-tk  lub  python3 -m pip install tk (któreś zadziała)
 #python3 -m pip install pymongo
 
 import tkinter as tk

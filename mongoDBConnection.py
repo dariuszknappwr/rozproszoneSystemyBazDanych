@@ -2,7 +2,7 @@ from pymongo import MongoClient, errors
 
 class MongoDBConnection:
     _instance = None
-    DB_NAME = 'your_database_name'
+    DB_NAME = 'flota_pojazdow'
 
     @staticmethod
     def getInstance():
@@ -15,7 +15,7 @@ class MongoDBConnection:
             raise Exception("This class is a singleton!")
         else:
             MongoDBConnection._instance = self
-            self.client = MongoClient('localhost', 27017, serverSelectionTimeoutMS=5000)
+            self.client = MongoClient('localhost', 27017, serverSelectionTimeoutMS=2500, directConnection=True)
 
     def get_database(self):
         return self.client[self.DB_NAME]

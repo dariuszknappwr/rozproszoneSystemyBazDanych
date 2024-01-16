@@ -25,6 +25,11 @@ class LoginPage(Base):
         self.errorLabel = tk.Label(self.frame)
         self.errorLabel.grid(row=4, column=0, columnspan=2)  # Add an empty error label
 
+        self.usernameEntry.focus_set()
+
+        # Bind the <Return> event to the button's command
+        self.master.bind('<Return>', lambda event: self.button1.invoke())
+
     def login(self):
         try:
             MongoDBConnection.getInstance().client.server_info() #to force to call to the server and check that it is available
@@ -40,7 +45,8 @@ class LoginPage(Base):
         user = users.find_one({'username': username, 'password': password})
 
         if user is not None:
+            self.frame.destroy()
             from startingPage import StartingPage
-            self.change_window(StartingPage, user)
+            StartingPage(self, user)
         else:
             self.errorLabel.config(text="Nie znaleziono użytkownika lub hasła")  # Update the error label text

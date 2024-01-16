@@ -4,6 +4,10 @@ import tkinter as tk
 class StartingPage(Base):
     def __init__(self, master, user):
         super().__init__(master)
+        self.user = user
+
+        self.frame = tk.Frame(master)
+        self.frame.grid()
 
         if self.check_admin_privileges(user):
             self.manageUsersButton = tk.Button(self.frame, text='Zarządzaj użytkownikami', width=25, command=self.manage_users)
@@ -25,8 +29,9 @@ class StartingPage(Base):
         return user.get('role') == 'admin'
 
     def manage_users(self):
+        self.frame.destroy()
         from manageUsersPage import ManageUsersPage
-        self.change_window(StartingPage, user)
+        ManageUsersPage(self, self.user)
 
     def manage_vehicles(self):
         print("Button 'zarządzaj pojazdami' clicked")
@@ -37,8 +42,7 @@ class StartingPage(Base):
     def manage_routes(self):
         print("Button 'zarządzaj trasami' clicked")
 
-        
-
     def logout(self):
         from loginPage import LoginPage
-        self.logout(LoginPage)
+        self.frame.destroy()
+        LoginPage(None)
