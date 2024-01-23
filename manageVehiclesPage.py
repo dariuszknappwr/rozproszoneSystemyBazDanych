@@ -3,6 +3,8 @@ from base import Base
 from mongoDBConnection import MongoDBConnection
 import tkinter as tk
 from tkinter import ttk
+from tkcalendar import DateEntry
+
 
 class ManageVehiclesPage(Base):
     def __init__(self, master, user):
@@ -12,144 +14,162 @@ class ManageVehiclesPage(Base):
         self.frame = tk.Frame(master)
         self.frame.grid()
 
-        self.users_collection = MongoDBConnection.getInstance().get_vehicles_collection()
+        self.vehicles_collection = MongoDBConnection.getInstance().get_vehicles_collection()
 
-        self.username_label = tk.Label(self.frame, text="Login:")
-        self.username_label.pack()
-
-        self.users_treeview = ttk.Treeview(self.frame, columns=('Username', 'Password', 'Role'), show='headings')
-        self.users_treeview.pack()
-        self.users_treeview.heading('Username', text='Username')
-        self.users_treeview.heading('Password', text='Password')
-        self.users_treeview.heading('Role', text='Role')
-        self.users_treeview.bind('<<TreeviewSelect>>', self.on_treeview_select)
+        self.vehicles_treeview = ttk.Treeview(self.frame, columns=('Marka', 'Model', 'Data rejestracji', 'nr tablicy rejestracyjnej', 'kierowca'), show='headings')
+        self.vehicles_treeview.pack()
+        self.vehicles_treeview.heading('Marka', text='Marka')
+        self.vehicles_treeview.heading('Model', text='Model')
+        self.vehicles_treeview.heading('Data rejestracji', text='Data rejestracji')
+        self.vehicles_treeview.heading('nr tablicy rejestracyjnej', text='nr tablicy rejestracyjnej')
+        self.vehicles_treeview.heading('kierowca', text='kierowca')
+        self.vehicles_treeview.bind('<<TreeviewSelect>>', self.on_treeview_select)
 
         self.populate_vehicles_treeview()
 
-        self.delete_user_button = tk.Button(self.frame, text="Usuń użytkownika", command=self.delete_user_button_click)
-        self.delete_user_button.pack()
+        self.brand_label = tk.Label(self.frame, text="Marka:")
+        self.brand_label.pack()
 
-        self.username_label.pack()
-        self.username_entry = tk.Entry(self.frame)
-        self.username_entry.pack()
+        self.brand_entry = tk.Entry(self.frame)
+        self.brand_entry.pack()
 
-        self.password_label = tk.Label(self.frame, text="Nowe hasło:")
-        self.password_label.pack()
-        self.password_entry = tk.Entry(self.frame, show="*")
-        self.password_entry.pack()
+        self.model_label = tk.Label(self.frame, text="Model:")
+        self.model_label.pack()
 
-        self.role_label = tk.Label(self.frame, text="Role:")
-        self.role_label.pack()
-        self.role_var = tk.StringVar()
-        self.role_options = ['admin', 'user']
-        self.role_dropdown = ttk.OptionMenu(self.frame, self.role_var, 'user' , *self.role_options)
-        self.role_dropdown.pack()
+        self.model_entry = tk.Entry(self.frame)
+        self.model_entry.pack()
 
-        self.add_user_button = tk.Button(self.frame, text="Dodaj użytkownika", command=self.add_user_button_click)
-        self.add_user_button.pack()
+        self.registration_date_label = tk.Label(self.frame, text="Data rejestracji:")
+        self.registration_date_label.pack()
 
-        self.edit_user_button = tk.Button(self.frame, text="Edytuj użytkownika", command=self.edit_user_button_click)
-        self.edit_user_button.pack()
+        self.registration_date_entry = DateEntry(self.frame)
+        self.registration_date_entry.pack()
 
-        self.change_password_button = tk.Button(self.frame, text="Zmień hasło", command=self.change_password_button_click)
-        self.change_password_button.pack()
+        self.license_plate_number_label = tk.Label(self.frame, text="nr tablicy rejestracyjnej:")
+        self.license_plate_number_label.pack()
+
+        self.license_plate_number_entry = tk.Entry(self.frame)
+        self.license_plate_number_entry.pack()
+
+        self.driver_label = tk.Label(self.frame, text="kierowca:")
+        self.driver_label.pack()
+
+        self.driver_entry = ttk.Combobox(self.frame, values=self.get_drivers())
+        self.driver_entry.pack()
+
+        self.add_vehicle_button = tk.Button(self.frame, text="Dodaj pojazd", command=self.add_vehicle_button_click)
+        self.add_vehicle_button.pack()
+
+        self.edit_vehicle_button = tk.Button(self.frame, text="Edytuj pojazd", command=self.edit_vehicle_button_click)
+        self.edit_vehicle_button.pack()
+
+        self.delete_vehicle_button = tk.Button(self.frame, text="Usuń pojazd", command=self.delete_vehicle_button_click)
+        self.delete_vehicle_button.pack()
 
         self.back_button = tk.Button(self.frame, text="Powrót", command=self.back_button_click)
         self.back_button.pack()
 
-    def on_treeview_select(self, event):
-        selected_items = self.users_treeview.selection()
+    def add_vehicle_button_click(self):
+        brand = self.brand_entry.get()
+        model = self.model_entry.get()
+        registration_date = self.registration_date_entry.get_date()
+        registration_date = registration_date.strftime('%Y-%m-%d')
+        license_plate_number = self.license_plate_number_entry.get()
+        driver = self.driver_entry.get()
+        if brand and model and registration_date and license_plate_number:
+            self.vehicles_collection.insert_one({'brand': brand, 'model': model, 'registration_date': registration_date, 'license_plate_number': license_plate_number, 'driver': driver})
+            self.populate_vehicles_treeview()
+        else:
+            print('Please fill all fields')
+
+    def edit_vehicle_button_click(self):
+        selected_items = self.vehicles_treeview.selection()
         if selected_items:
             selected_item = selected_items[0]
-            selected_username = self.users_treeview.item(selected_item)['values'][0]
-            selected_role = self.users_treeview.item(selected_item)['values'][2]
-            self.username_entry.delete(0, tk.END)
-            self.username_entry.insert(0, selected_username)
-            self.role_var.set(selected_role)
+            selected_license_plate_number = self.vehicles_treeview.item(selected_item)['values'][3]
 
+            brand = self.brand_entry.get()
+            model = self.model_entry.get()
+            registration_date = self.registration_date_entry.get_date()
+            registration_date = registration_date.strftime('%Y-%m-%d')
+            license_plate_number = self.license_plate_number_entry.get()
+            driver = self.driver_entry.get()
 
-    def add_user_button_click(self):
-        username = self.username_entry.get()
-        role = self.role_var.get()
-        password = self.password_entry.get()
-        self.add_user(username, password, role)
+            if brand and model and registration_date and license_plate_number:
+                vehicle = self.vehicles_collection.find_one({'license_plate_number': selected_license_plate_number})
+                print(vehicle)
+                self.vehicles_collection.update_one({'license_plate_number': selected_license_plate_number}, {'$set': {'brand': brand, 'model': model, 'registration_date': registration_date, 'license_plate_number': license_plate_number, 'driver': driver}})
+                self.populate_vehicles_treeview()
+                print('Vehicle updated successfully.')
+            else:
+                print('Please fill all fields')
+        else:
+            print('Please select a vehicle')
 
-    def edit_user_button_click(self):
-        username = self.username_entry.get()
-        new_role = self.role_var.get()
-        password = self.password_entry.get()
-        self.edit_user(username, password, new_role)
+    def delete_vehicle_button_click(self):
+        selected_items = self.vehicles_treeview.selection()
+        if selected_items:
+            selected_item = selected_items[0]
+            selected_brand = self.vehicles_treeview.item(selected_item)['values'][0]
+            selected_model = self.vehicles_treeview.item(selected_item)['values'][1]
+            selected_registration_date = self.vehicles_treeview.item(selected_item)['values'][2]
+            selected_license_plate_number = self.vehicles_treeview.item(selected_item)['values'][3]
+            selected_driver = self.vehicles_treeview.item(selected_item)['values'][4]
 
-    def change_password_button_click(self):
-        username = self.username_entry.get()
-        new_password = self.password_entry.get()
-        self.change_password(username, new_password)
+            self.vehicles_collection.delete_one({'brand': selected_brand, 'model': selected_model, 'registration_date': selected_registration_date, 'license_plate_number': selected_license_plate_number, 'driver': selected_driver})
+            self.populate_vehicles_treeview()
+        else:
+            print('Please select a vehicle')
 
-    def add_user(self, username, password, role):
-        try:
-            user = {
-                'username': username,
-                'password': password,
-                'role': role
-            }
-            self.users_collection.insert_one(user)
-            self.populate_users_treeview()
-            print('User added successfully.')
-        except Exception as e:
-            print('Error adding user:', str(e))
+       
+    def on_treeview_select(self, event):
+        selected_items = self.vehicles_treeview.selection()
+        if selected_items:
+            selected_item = selected_items[0]
+            selected_brand = self.vehicles_treeview.item(selected_item)['values'][0]
+            selected_model = self.vehicles_treeview.item(selected_item)['values'][1]
+            selected_registration_date = self.vehicles_treeview.item(selected_item)['values'][2]
+            selected_license_plate_number = self.vehicles_treeview.item(selected_item)['values'][3]
+            selected_driver = self.vehicles_treeview.item(selected_item)['values'][4]
 
-    def change_password(self, username, new_password):
-        try:
-            query = {'username': username}
-            new_values = {'$set': {'password': new_password}}
-            self.users_collection.update_one(query, new_values)
-            print('Password changed successfully.')
-        except Exception as e:
-            print('Error changing password:', str(e))
+            self.brand_entry.delete(0, tk.END)
+            self.brand_entry.insert(0, selected_brand)
+            self.model_entry.delete(0, tk.END)
+            self.model_entry.insert(0, selected_model)
+            self.registration_date_entry.delete(0, tk.END)
+            self.registration_date_entry.insert(0, selected_registration_date)
+            self.license_plate_number_entry.delete(0, tk.END)
+            self.license_plate_number_entry.insert(0, selected_license_plate_number)
+            self.driver_entry.delete(0, tk.END)
+            self.driver_entry.insert(0, selected_driver)
 
-    def edit_user(self, username, password, new_role):
-        try:
-            query = {'username': username}
-            new_values = {'$set': {'password:': password, 'role': new_role}}
-            self.users_collection.update_one(query, new_values)
-            print('User updated successfully.')
-        except Exception as e:
-            print('Error editing user:', str(e))
-
-    def remove_user(self, username):
-        try:
-            query = {'username': username}
-            self.users_collection.delete_one(query)
-            print('User removed successfully.')
-        except Exception as e:
-            print('Error removing user:', str(e))
+            
 
     def populate_vehicles_treeview(self):
-        for i in self.users_treeview.get_children():
-            self.users_treeview.delete(i)
-        users = self.get_users()  
-        for user in users:
-            self.users_treeview.insert('', 'end', values=(user['username'], user['password'], user['role']))  # Add the user details to the users_treeview
+        for i in self.vehicles_treeview.get_children():
+            self.vehicles_treeview.delete(i)
+        vehicles = self.get_vehicles()  
+        for vehicle in vehicles:
+            self.vehicles_treeview.insert('', 'end', values=(vehicle['brand'], vehicle['model'], vehicle['registration_date'], vehicle['license_plate_number'], vehicle['driver']))
 
-    def get_users(self):
+    def get_vehicles(self):
         try:
-            users = self.users_collection.find()
-            return list(users)
+            vehicles = self.vehicles_collection.find()
+            return list(vehicles)
         except Exception as e:
-            print('Error getting users:', str(e))
-
-    def delete_user_button_click(self):
-        selected_user = self.users_treeview.item(self.users_treeview.selection())['values'][0]
-        self.delete_user(selected_user)
-
-    def delete_user(self, username):
+            print('Error getting vehicles:', str(e))
+            return []
+        
+    def get_drivers(self):
         try:
-            query = {'username': username}
-            self.users_collection.delete_one(query)
-            print('User deleted successfully.')
-            self.populate_users_treeview()
+            drivers_collection = MongoDBConnection.getInstance().get_drivers_collection()
+            drivers = drivers_collection.find()
+            return [driver['name'] for driver in drivers]
         except Exception as e:
-            print('Error deleting user:', str(e))
+            print('Error getting drivers:', str(e))
+            return []
+
+
     
     def back_button_click(self):
         self.frame.destroy()

@@ -13,9 +13,6 @@ class ManageUsersPage(Base):
 
         self.users_collection = MongoDBConnection.getInstance().get_users_collection()
 
-        self.username_label = tk.Label(self.frame, text="Login:")
-        self.username_label.pack()
-
         self.users_treeview = ttk.Treeview(self.frame, columns=('Username', 'Password', 'Role'), show='headings')
         self.users_treeview.pack()
         self.users_treeview.heading('Username', text='Username')
@@ -27,6 +24,9 @@ class ManageUsersPage(Base):
 
         self.delete_user_button = tk.Button(self.frame, text="Usuń użytkownika", command=self.delete_user_button_click)
         self.delete_user_button.pack()
+
+        self.username_label = tk.Label(self.frame, text="Login:")
+        self.username_label.pack()
 
         self.username_label.pack()
         self.username_entry = tk.Entry(self.frame)

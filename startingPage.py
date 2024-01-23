@@ -19,6 +19,9 @@ class StartingPage(Base):
         self.manageDriversButton = tk.Button(self.frame, text='Zarządzaj kierowcami', width=25, command=self.manage_drivers)
         self.manageDriversButton.pack()
 
+        #self.manageDriversButton = tk.Button(self.frame, text='Przypisz kierowcę do pojazdu', width=25, command=self.manage_drivers_vehicles_connection)
+        #self.manageDriversButton.pack()
+
         self.manageRoutesButton = tk.Button(self.frame, text='Zarządzaj trasami', width=25, command=self.manage_routes)
         self.manageRoutesButton.pack()
 
@@ -34,13 +37,24 @@ class StartingPage(Base):
         ManageUsersPage(self, self.user)
 
     def manage_vehicles(self):
-        print("Button 'zarządzaj pojazdami' clicked")
+        self.frame.destroy()
+        from manageVehiclesPage import ManageVehiclesPage
+        ManageVehiclesPage(self, self.user)
     
     def manage_drivers(self):
-        print("Button 'zarządzaj kierowcami' clicked")
+        self.frame.destroy()
+        from manageDriversPage import ManageDriversPage
+        ManageDriversPage(self, self.user)
+
+    def manage_drivers_vehicles_connection(self):
+        self.frame.destroy()
+        from manageDriverVehicleConnectionPage import ManageDriverVehicleConnectionPage
+        ManageDriverVehicleConnectionPage(self, self.user)
 
     def manage_routes(self):
-        print("Button 'zarządzaj trasami' clicked")
+        self.frame.destroy()
+        from manageRoutesPage import ManageRoutesPage
+        ManageRoutesPage(self, self.user)
 
     def logout(self):
         from loginPage import LoginPage

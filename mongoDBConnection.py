@@ -47,9 +47,17 @@ class MongoDBConnection:
         return self.client[self.DB_NAME]
     
     def get_users_collection(self):
-        return self.get_database()['users']
+        db = self.get_database()
+        return db['users']
     
     def get_vehicles_collection(self):
         return self.get_database()['vehicles']
     
-    #mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.1.1
+    def get_drivers_collection(self):
+        return self.get_database()['drivers']
+    
+    def get_routes_collection(self):
+        return self.get_database()['routes']
+    
+    def get_drivers_vehicles_collection(self):
+        return self.get_database()['drivers_vehicles']
