@@ -34,7 +34,7 @@ class LoginPage(Base):
         try:
             MongoDBConnection.getInstance().client.server_info() #to force to call to the server and check that it is available
         except errors.ServerSelectionTimeoutError as err:
-            self.errorLabel.config(text="Nie można połączyć z bazą danych")  # Update the error label text
+            self.errorLabel.config(text="Nie można połączyć z bazą danych")
             return
 
         users = MongoDBConnection.getInstance().get_users_collection()
@@ -49,4 +49,4 @@ class LoginPage(Base):
             from startingPage import StartingPage
             StartingPage(self, user)
         else:
-            self.errorLabel.config(text="Nie znaleziono użytkownika lub hasła")  # Update the error label text
+            self.errorLabel.config(text="Nie znaleziono użytkownika lub hasła")

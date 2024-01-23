@@ -1,7 +1,6 @@
 from base import Base
 from mongoDBConnection import MongoDBConnection
 import tkinter as tk
-import tkinter as tk
 from tkinter import ttk
 
 class ManageUsersPage(Base):
@@ -58,12 +57,14 @@ class ManageUsersPage(Base):
         self.back_button.pack()
 
     def on_treeview_select(self, event):
-        selected_item = self.users_treeview.selection()[0] 
-        selected_username = self.users_treeview.item(selected_item)['values'][0]
-        selected_role = self.users_treeview.item(selected_item)['values'][2]
-        self.username_entry.delete(0, tk.END) 
-        self.username_entry.insert(0, selected_username)  
-        self.role_var.set(selected_role)
+        selected_items = self.users_treeview.selection()
+        if selected_items:
+            selected_item = selected_items[0]
+            selected_username = self.users_treeview.item(selected_item)['values'][0]
+            selected_role = self.users_treeview.item(selected_item)['values'][2]
+            self.username_entry.delete(0, tk.END)
+            self.username_entry.insert(0, selected_username)
+            self.role_var.set(selected_role)
 
 
     def add_user_button_click(self):
