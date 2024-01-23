@@ -25,6 +25,9 @@ class ManageVehiclesPage(Base):
         self.vehicles_treeview.heading('kierowca', text='kierowca')
         self.vehicles_treeview.bind('<<TreeviewSelect>>', self.on_treeview_select)
 
+        self.info_label = tk.Label(self.frame, text="")
+        self.info_label.pack()
+
         self.populate_vehicles_treeview()
 
         self.brand_label = tk.Label(self.frame, text="Marka:")
@@ -57,6 +60,8 @@ class ManageVehiclesPage(Base):
         self.driver_entry = ttk.Combobox(self.frame, values=self.get_drivers())
         self.driver_entry.pack()
 
+        tk.Label(self.frame, text="").pack(pady=10)
+
         self.add_vehicle_button = tk.Button(self.frame, text="Dodaj pojazd", command=self.add_vehicle_button_click)
         self.add_vehicle_button.pack()
 
@@ -80,7 +85,7 @@ class ManageVehiclesPage(Base):
             self.vehicles_collection.insert_one({'brand': brand, 'model': model, 'registration_date': registration_date, 'license_plate_number': license_plate_number, 'driver': driver})
             self.populate_vehicles_treeview()
         else:
-            print('Please fill all fields')
+            self.info_label.config(text='Proszę wypełnić wszystkie pola.')
 
     def edit_vehicle_button_click(self):
         selected_items = self.vehicles_treeview.selection()
@@ -97,14 +102,13 @@ class ManageVehiclesPage(Base):
 
             if brand and model and registration_date and license_plate_number:
                 vehicle = self.vehicles_collection.find_one({'license_plate_number': selected_license_plate_number})
-                print(vehicle)
                 self.vehicles_collection.update_one({'license_plate_number': selected_license_plate_number}, {'$set': {'brand': brand, 'model': model, 'registration_date': registration_date, 'license_plate_number': license_plate_number, 'driver': driver}})
                 self.populate_vehicles_treeview()
-                print('Vehicle updated successfully.')
+                self.info_label.config(text='Edycja pojazdu przebiegła pomyślnie.')
             else:
-                print('Please fill all fields')
+                self.info_label.config(text='Proszę wypełnić wszystkie pola.')
         else:
-            print('Please select a vehicle')
+            self.info_label.config(text='Proszę wybrać pojazd.')
 
     def delete_vehicle_button_click(self):
         selected_items = self.vehicles_treeview.selection()
@@ -119,7 +123,7 @@ class ManageVehiclesPage(Base):
             self.vehicles_collection.delete_one({'brand': selected_brand, 'model': selected_model, 'registration_date': selected_registration_date, 'license_plate_number': selected_license_plate_number, 'driver': selected_driver})
             self.populate_vehicles_treeview()
         else:
-            print('Please select a vehicle')
+            self.info_label.config(text='Proszę wybrać pojazd.')
 
        
     def on_treeview_select(self, event):
@@ -157,7 +161,7 @@ class ManageVehiclesPage(Base):
             vehicles = self.vehicles_collection.find()
             return list(vehicles)
         except Exception as e:
-            print('Error getting vehicles:', str(e))
+            self.info_label.config(text='Błąd podczas wyszukiwania pojazdów.' + str(e))
             return []
         
     def get_drivers(self):
@@ -166,7 +170,7 @@ class ManageVehiclesPage(Base):
             drivers = drivers_collection.find()
             return [driver['name'] for driver in drivers]
         except Exception as e:
-            print('Error getting drivers:', str(e))
+            self.info_label.config(text='Błąd podczas wyszukiwania kierowców.' + str(e))
             return []
 
 

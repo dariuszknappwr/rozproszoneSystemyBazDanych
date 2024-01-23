@@ -9,21 +9,20 @@ class StartingPage(Base):
         self.frame = tk.Frame(master)
         self.frame.grid()
 
-        if self.check_admin_privileges(user):
-            self.manageUsersButton = tk.Button(self.frame, text='Zarządzaj użytkownikami', width=25, command=self.manage_users)
-            self.manageUsersButton.pack()
+        
+        self.manageUsersButton = tk.Button(self.frame, text='Zarządzaj użytkownikami', width=25, command=self.manage_users)
+        self.manageUsersButton.pack(pady=5)
 
         self.manageVehiclesButton = tk.Button(self.frame, text='Zarządzaj pojazdami', width=25, command=self.manage_vehicles)
-        self.manageVehiclesButton.pack()
+        self.manageVehiclesButton.pack(pady=5)
         
         self.manageDriversButton = tk.Button(self.frame, text='Zarządzaj kierowcami', width=25, command=self.manage_drivers)
-        self.manageDriversButton.pack()
-
-        #self.manageDriversButton = tk.Button(self.frame, text='Przypisz kierowcę do pojazdu', width=25, command=self.manage_drivers_vehicles_connection)
-        #self.manageDriversButton.pack()
+        self.manageDriversButton.pack(pady=5)
 
         self.manageRoutesButton = tk.Button(self.frame, text='Zarządzaj trasami', width=25, command=self.manage_routes)
-        self.manageRoutesButton.pack()
+        self.manageRoutesButton.pack(pady=5)
+
+        tk.Label(self.frame, text="").pack(pady=10)
 
         self.quitButton = tk.Button(self.frame, text='Wyloguj', width=25, command=self.logout)
         self.quitButton.pack()

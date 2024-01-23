@@ -20,10 +20,14 @@ class ManageDriversPage(Base):
         self.drivers_treeview.heading('Identyfikator', text='Identyfikator')
         self.drivers_treeview.bind('<<TreeviewSelect>>', self.on_treeview_select)
 
+        self.info_label = tk.Label(self.frame, text="")
+        self.info_label.pack()
+
         self.populate_drivers_treeview()
 
         self.delete_driver_button = tk.Button(self.frame, text="Usuń kierowcę", command=self.delete_driver_button_click)
-        self.delete_driver_button.pack()
+        if self.user['role'] == 'admin':
+            self.delete_driver_button.pack()
 
         self.name_label = tk.Label(self.frame, text="Imię:")
         self.name_label.pack()
@@ -43,11 +47,15 @@ class ManageDriversPage(Base):
         self.id_entry = tk.Entry(self.frame)
         self.id_entry.pack()
 
+        tk.Label(self.frame, text="").pack(pady=10)
+
         self.add_driver_button = tk.Button(self.frame, text="Dodaj kierowcę", command=self.add_driver_button_click)
-        self.add_driver_button.pack()
+        if self.user['role'] == 'admin':
+            self.add_driver_button.pack()
 
         self.edit_driver_button = tk.Button(self.frame, text="Edytuj kierowcę", command=self.edit_driver_button_click)
-        self.edit_driver_button.pack()
+        if self.user['role'] == 'admin':
+            self.edit_driver_button.pack()
 
         self.back_button = tk.Button(self.frame, text="Powrót", command=self.back_button_click)
         self.back_button.pack()
@@ -81,9 +89,9 @@ class ManageDriversPage(Base):
             selected_id = self.drivers_treeview.item(selected_item)['values'][2]
             self.drivers_collection.delete_one({'name': selected_name, 'surname': selected_surname, 'id': selected_id})
             self.populate_drivers_treeview()
-            print('Driver deleted successfully.')
+            self.info_label.config(text='Usuwanie kierowcy przebiegło pomyślnie.')
         else:
-            print('Please select a driver')
+            self.info_label.config(text='Proszę wybrać kierowcę.')
 
     def add_driver_button_click(self):
         name = self.name_entry.get()
@@ -93,7 +101,7 @@ class ManageDriversPage(Base):
             self.drivers_collection.insert_one({'name': name, 'surname': surname, 'id': id})
             self.populate_drivers_treeview()
         else:
-            print('Please fill all fields')
+            self.info_label.config(text='Proszę wypełnić wszystkie pola.')
 
     def edit_driver_button_click(self):
         selected_items = self.drivers_treeview.selection()
@@ -110,11 +118,11 @@ class ManageDriversPage(Base):
             if name and surname and id:
                 self.drivers_collection.update_one({'name': selected_name, 'surname': selected_surname, 'id': selected_id}, {'$set': {'name': name, 'surname': surname, 'id': id}})
                 self.populate_drivers_treeview()
-                print('Driver updated successfully.')
+                self.info_label.config(text='Edycja kierowcy przebiegła pomyślnie.')
             else:
-                print('Please fill all fields')
+                self.info_label.config(text='Proszę wypełnić wszystkie pola.')
         else:
-            print('Please select a driver')
+            self.info_label.config(text='Proszę wybrać kierowcę.')
 
     def back_button_click(self):
         self.frame.destroy()

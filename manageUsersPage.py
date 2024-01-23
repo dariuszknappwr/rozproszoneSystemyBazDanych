@@ -13,17 +13,21 @@ class ManageUsersPage(Base):
 
         self.users_collection = MongoDBConnection.getInstance().get_users_collection()
 
-        self.users_treeview = ttk.Treeview(self.frame, columns=('Username', 'Password', 'Role'), show='headings')
+        self.users_treeview = ttk.Treeview(self.frame, columns=('Login', 'Hasło', 'Rola'), show='headings')
         self.users_treeview.pack()
-        self.users_treeview.heading('Username', text='Username')
-        self.users_treeview.heading('Password', text='Password')
-        self.users_treeview.heading('Role', text='Role')
+        self.users_treeview.heading('Login', text='Login')
+        self.users_treeview.heading('Hasło', text='Hasło')
+        self.users_treeview.heading('Rola', text='Rola')
         self.users_treeview.bind('<<TreeviewSelect>>', self.on_treeview_select)
+
+        self.info_label = tk.Label(self.frame, text="")
+        self.info_label.pack()
 
         self.populate_users_treeview()
 
         self.delete_user_button = tk.Button(self.frame, text="Usuń użytkownika", command=self.delete_user_button_click)
-        self.delete_user_button.pack()
+        if self.user['role'] == 'admin':
+            self.delete_user_button.pack()
 
         self.username_label = tk.Label(self.frame, text="Login:")
         self.username_label.pack()
@@ -37,21 +41,28 @@ class ManageUsersPage(Base):
         self.password_entry = tk.Entry(self.frame, show="*")
         self.password_entry.pack()
 
-        self.role_label = tk.Label(self.frame, text="Role:")
+        self.role_label = tk.Label(self.frame, text="Rola:")
         self.role_label.pack()
         self.role_var = tk.StringVar()
         self.role_options = ['admin', 'user']
         self.role_dropdown = ttk.OptionMenu(self.frame, self.role_var, 'user' , *self.role_options)
         self.role_dropdown.pack()
 
+        tk.Label(self.frame, text="").pack(pady=10)
+
         self.add_user_button = tk.Button(self.frame, text="Dodaj użytkownika", command=self.add_user_button_click)
-        self.add_user_button.pack()
+        if self.user['role'] == 'admin':
+            self.add_user_button.pack()
+
 
         self.edit_user_button = tk.Button(self.frame, text="Edytuj użytkownika", command=self.edit_user_button_click)
-        self.edit_user_button.pack()
+        if self.user['role'] == 'admin':
+            self.edit_user_button.pack()
 
         self.change_password_button = tk.Button(self.frame, text="Zmień hasło", command=self.change_password_button_click)
         self.change_password_button.pack()
+
+        tk.Label(self.frame, text="").pack(pady=10)
 
         self.back_button = tk.Button(self.frame, text="Powrót", command=self.back_button_click)
         self.back_button.pack()
@@ -82,6 +93,9 @@ class ManageUsersPage(Base):
     def change_password_button_click(self):
         username = self.username_entry.get()
         new_password = self.password_entry.get()
+        if self.user['role'] != 'admin'and self.user['username'] != username:
+            self.info_label.config(text='Możesz zmienić jedynie swoje własne hasło.')
+            return
         self.change_password(username, new_password)
 
     def add_user(self, username, password, role):
@@ -93,35 +107,38 @@ class ManageUsersPage(Base):
             }
             self.users_collection.insert_one(user)
             self.populate_users_treeview()
-            print('User added successfully.')
+            self.info_label.config(text='Dodawanie użytkownika przebiegło pomyślnie.')
         except Exception as e:
-            print('Error adding user:', str(e))
+            self.info_label.config(text='Błąd podczas dodawania użytkownika.' + str(e))
 
     def change_password(self, username, new_password):
         try:
             query = {'username': username}
             new_values = {'$set': {'password': new_password}}
             self.users_collection.update_one(query, new_values)
-            print('Password changed successfully.')
+            self.populate_users_treeview()
+            self.info_label.config(text='Zmiana hasła przebiegła pomyślnie.')
         except Exception as e:
-            print('Error changing password:', str(e))
+            self.info_label.config(text='Błąd podczas zmiany hasła.' + str(e))
 
     def edit_user(self, username, password, new_role):
         try:
             query = {'username': username}
-            new_values = {'$set': {'password:': password, 'role': new_role}}
+            new_values = {'$set': {'password': password, 'role': new_role}}
             self.users_collection.update_one(query, new_values)
-            print('User updated successfully.')
+            self.populate_users_treeview()
+            self.info_label.config(text='Edycja użytkownika przebiegła pomyślnie.')
         except Exception as e:
-            print('Error editing user:', str(e))
+            self.info_label.config(text='Błąd podczas edycji użytkownika.' + str(e))
 
     def remove_user(self, username):
         try:
             query = {'username': username}
             self.users_collection.delete_one(query)
-            print('User removed successfully.')
+            self.populate_users_treeview()
+            self.info_label.config(text='User removed successfully.')
         except Exception as e:
-            print('Error removing user:', str(e))
+            self.info_label.config(text='Error removing user.' + str(e))
 
     def populate_users_treeview(self):
         for i in self.users_treeview.get_children():
@@ -135,7 +152,7 @@ class ManageUsersPage(Base):
             users = self.users_collection.find()
             return list(users)
         except Exception as e:
-            print('Error getting users:', str(e))
+            self.info_label.config(text='Error getting users.' + str(e))
 
     def delete_user_button_click(self):
         selected_user = self.users_treeview.item(self.users_treeview.selection())['values'][0]
@@ -145,10 +162,10 @@ class ManageUsersPage(Base):
         try:
             query = {'username': username}
             self.users_collection.delete_one(query)
-            print('User deleted successfully.')
+            self.info_label.config(text='User deleted successfully.')
             self.populate_users_treeview()
         except Exception as e:
-            print('Error deleting user:', str(e))
+            self.info_label.config(text='Error deleting user.' + str(e))
     
     def back_button_click(self):
         self.frame.destroy()

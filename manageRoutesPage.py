@@ -25,12 +25,18 @@ class ManageRoutesPage(Base):
         self.routes_treeview.heading('Punkt docelowy', text='punkt docelowy')
         self.routes_treeview.bind('<<TreeviewSelect>>', self.on_treeview_select)
 
+        self.info_label = tk.Label(self.frame, text="")
+        self.info_label.pack()
+
         self.sort_order = {col: 'ascending' for col in self.routes_treeview['columns']}
 
         for col in self.routes_treeview['columns']:
             self.routes_treeview.heading(col, text=col, command=lambda _col=col: self.on_heading_click(_col))
 
-        self.filter_label = tk.Label(self.frame, text="Filter:")
+        self.filter_label = tk.Label(self.frame, text="Kliknij na nagłówku tabeli aby posortować")
+        self.filter_label.pack()
+
+        self.filter_label = tk.Label(self.frame, text="Filtruj punkty docelowe:")
         self.filter_label.pack()
 
         self.filter_entry = tk.Entry(self.frame)
@@ -70,10 +76,12 @@ class ManageRoutesPage(Base):
         self.add_route_button.pack()
 
         self.edit_route_button = tk.Button(self.frame, text="Edytuj trasę", command=self.edit_route_button_click)
-        self.edit_route_button.pack()
+        if self.user['role'] == 'admin':
+            self.edit_route_button.pack()
 
         self.back_button = tk.Button(self.frame, text="Powrót", command=self.back_button_click)
-        self.back_button.pack()
+        if self.user['role'] == 'admin':
+            self.back_button.pack()
 
     def on_treeview_select(self, event):
         selected_items = self.routes_treeview.selection()
@@ -118,7 +126,7 @@ class ManageRoutesPage(Base):
             self.routes_collection.insert_one({'date': date, 'driver': driver, 'vehicle': vehicle, 'route': route})
             self.populate_routes_treeview()
         else:
-            print('Please fill all fields')
+            self.info_label.config(text='Proszę wypełnić wszystkie pola.')
 
     def edit_route_button_click(self):
         selected_items = self.routes_treeview.selection()
@@ -137,11 +145,11 @@ class ManageRoutesPage(Base):
             if date and driver and vehicle and route:
                 self.routes_collection.update_one({'date': selected_date, 'driver': selected_driver, 'vehicle': selected_vehicle, 'route': selected_route}, {'$set': {'date': date, 'driver': driver, 'vehicle': vehicle, 'route': route}})
                 self.populate_routes_treeview()
-                print('Route updated successfully.')
+                self.info_label.config(text='Edycja trasy przebiegła pomyślnie.')
             else:
-                print('Please fill all fields')
+                self.info_label.config(text='Proszę wypełnić wszystkie pola.')
         else:
-            print('Please select a route')
+            self.info_label.config(text='Proszę wybrać trasę.')
 
     def get_drivers(self):
         drivers = self.drivers_collection.find()
