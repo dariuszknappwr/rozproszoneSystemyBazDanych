@@ -30,22 +30,28 @@ class ManageDriversPage(Base):
             self.delete_driver_button.pack()
 
         self.name_label = tk.Label(self.frame, text="Imię:")
-        self.name_label.pack()
+        if self.user['role'] == 'admin':
+            self.name_label.pack()
 
         self.name_entry = tk.Entry(self.frame)
-        self.name_entry.pack()
+        if self.user['role'] == 'admin':
+            self.name_entry.pack()
 
         self.surname_label = tk.Label(self.frame, text="Nazwisko:")
-        self.surname_label.pack()
+        if self.user['role'] == 'admin':
+            self.surname_label.pack()
 
         self.surname_entry = tk.Entry(self.frame)
-        self.surname_entry.pack()
+        if self.user['role'] == 'admin':
+            self.surname_entry.pack()
 
         self.id_label = tk.Label(self.frame, text="Identyfikator:")
-        self.id_label.pack()
+        if self.user['role'] == 'admin':
+            self.id_label.pack()
 
         self.id_entry = tk.Entry(self.frame)
-        self.id_entry.pack()
+        if self.user['role'] == 'admin':
+            self.id_entry.pack()
 
         tk.Label(self.frame, text="").pack(pady=10)
 

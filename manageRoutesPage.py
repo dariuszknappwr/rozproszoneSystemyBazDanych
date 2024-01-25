@@ -80,8 +80,7 @@ class ManageRoutesPage(Base):
             self.edit_route_button.pack()
 
         self.back_button = tk.Button(self.frame, text="Powrót", command=self.back_button_click)
-        if self.user['role'] == 'admin':
-            self.back_button.pack()
+        self.back_button.pack()
 
     def on_treeview_select(self, event):
         selected_items = self.routes_treeview.selection()

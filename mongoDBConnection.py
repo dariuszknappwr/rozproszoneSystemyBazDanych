@@ -16,22 +16,13 @@ class MongoDBConnection:
         else:
             MongoDBConnection._instance = self
             self.client = MongoClient('mongodb://localhost:27017?directConnection=true', serverSelectionTimeoutMS=1000)
-            if self.client.is_primary:
-                return
-            self.client = MongoClient('mongodb://localhost:27018?directConnection=true', serverSelectionTimeoutMS=1000)
-            if self.client.is_primary:
-                return
-            self.client = MongoClient('mongodb://localhost:27019?directConnection=true', serverSelectionTimeoutMS=1000)
-            if self.client.is_primary:
+            if self.client != None and self.client.is_primary:
                 return
             try:
                 MongoDBConnection.getInstance().client.server_info()
             except errors.ServerSelectionTimeoutError as err:
                 try:
                     self.client = MongoClient('mongodb://localhost:27018?directConnection=true', serverSelectionTimeoutMS=1000)
-                    if self.client.is_primary:
-                        return
-                    self.client = MongoClient('mongodb://localhost:27019?directConnection=true', serverSelectionTimeoutMS=1000)
                     if self.client.is_primary:
                         return
                 except errors.ServerSelectionTimeoutError as err:

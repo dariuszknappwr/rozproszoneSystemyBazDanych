@@ -55,9 +55,9 @@ class ManageUsersPage(Base):
             self.add_user_button.pack()
 
 
-        self.edit_user_button = tk.Button(self.frame, text="Edytuj użytkownika", command=self.edit_user_button_click)
-        if self.user['role'] == 'admin':
-            self.edit_user_button.pack()
+        #self.edit_user_button = tk.Button(self.frame, text="Edytuj użytkownika", command=self.edit_user_button_click)
+        #if self.user['role'] == 'admin':
+           # self.edit_user_button.pack()
 
         self.change_password_button = tk.Button(self.frame, text="Zmień hasło", command=self.change_password_button_click)
         self.change_password_button.pack()

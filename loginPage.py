@@ -31,11 +31,7 @@ class LoginPage(Base):
         self.master.bind('<Return>', lambda event: self.button1.invoke())
 
     def login(self):
-        try:
-            MongoDBConnection.getInstance().client.server_info() #to force to call to the server and check that it is available
-        except errors.ServerSelectionTimeoutError as err:
-            self.errorLabel.config(text="Nie można połączyć z bazą danych")
-            return
+        MongoDBConnection.getInstance().client.server_info() #to force to call to the server and check that it is available
 
         users = MongoDBConnection.getInstance().get_users_collection()
 
